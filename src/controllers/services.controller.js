@@ -8,9 +8,14 @@ export const getServices = (req, res) => {
 export const createService = (req, res) => {
   const { name, duration, price } = req.body;
 
-  if (!name || !duration || !price) {
-    return res.status(400).json({ message: 'Missing fields' });
-  }
+ if (
+  !name ||
+  typeof duration !== 'number' ||
+  typeof price !== 'number'
+) {
+  return res.status(400).json({ message: 'Invalid fields' });
+}
+
 
   const service = {
     id: serviceId++,
@@ -25,6 +30,12 @@ export const createService = (req, res) => {
 
 export const deleteService = (req, res) => {
   const { id } = req.params;
+
+  const exists = services.some(s => s.id === Number(id));
+  if (!exists) {
+    return res.status(404).json({ message: 'Service not found' });
+  }
+
   services = services.filter(s => s.id !== Number(id));
   res.json({ message: 'Service deleted' });
 };
