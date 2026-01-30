@@ -33,6 +33,60 @@ project-root/
 ├── package.json
 └── README.md
 ```
+🛠️ Instalación y ejecución
+📋 Requisitos previos
+
+Node.js v18+
+
+npm / pnpm / yarn
+
+PostgreSQL (opcional)
+
+Git
+
+Verificar versiones:
+
+node -v
+npm -v
+
+📥 Clonar el repositorio
+git clone https://github.com/tu-usuario/tu-repo.git
+cd tu-repo
+
+📦 Instalar dependencias
+npm install
+
+⚙️ Variables de entorno
+
+Crear un archivo .env en la raíz:
+
+PORT=3000
+JWT_SECRET=super_secret_key
+
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=veterinary_db
+DB_USER=postgres
+DB_PASSWORD=postgres
+
+
+⚠️ Si se usa almacenamiento en memoria (arrays), la base de datos es opcional.
+
+▶️ Ejecutar el proyecto
+
+Modo desarrollo:
+
+npm run dev
+
+
+Modo producción:
+
+npm start
+
+
+Servidor disponible en:
+
+http://localhost:3000
 
 ---
 
