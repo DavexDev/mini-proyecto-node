@@ -92,6 +92,65 @@ createdb vetclinic
 psql vetclinic < schema.sql
 ```
 
+##Docker (Base de Datos)
+
+El proyecto incluye soporte para Docker con PostgreSQL, permitiendo levantar el entorno de base de datos de forma rápida y reproducible.
+
+El archivo `docker-compose.yml` se encuentra en la raíz del proyecto y define el servicio de base de datos.
+
+### 📦 Servicios
+
+- PostgreSQL 14
+- Base de datos: `vetclinic`
+- Usuario: `vetuser`
+- Puerto expuesto: `5433`
+
+El esquema inicial se carga automáticamente desde:
+
+db/schema.sql
+
+
+mediante el mecanismo estándar de inicialización de PostgreSQL (`docker-entrypoint-initdb.d`).
+
+### Levantar el entorno
+
+Desde la raíz del proyecto:
+
+```bash
+docker-compose up -d
+```
+Para reiniciar completamente el entorno (incluyendo volúmenes):
+
+```bash
+docker-compose down -v
+docker-compose up -d
+```
+
+Verificación
+Se puede acceder manualmente a la base de datos para validar las tablas:
+
+```bash
+docker exec -it vetclinic_db psql -U vetuser -d vetclinic
+```
+Ejemplo:
+
+```bash
+\dt
+```
+List of relations
+| Schema | Name                       | Type  | Owner   |
+| ------ | -------------------------- | ----- | ------- |
+| public | appointment_status_history | table | vetuser |
+| public | appointments               | table | vetuser |
+| public | payments                   | table | vetuser |
+| public | pets                       | table | vetuser |
+| public | services                   | table | vetuser |
+| public | users                      | table | vetuser |
+| public | vets                       | table | vetuser |
+
+
+Esto confirmará que el esquema fue cargado correctamente.
+
 Autenticación
 - JWT (access token)
 - Password hashing con bcrypt
