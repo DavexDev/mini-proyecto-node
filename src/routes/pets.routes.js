@@ -6,6 +6,12 @@ import {
   getMyPets
 } from '../controllers/pets.controller.js';
 
+import {
+  createPetValidator
+} from '../validators/pets.validator.js';
+
+import { validate } from '../validators/common.js';
+
 const router = Router();
 
 // Cliente crea mascota
@@ -13,6 +19,8 @@ router.post(
   '/',
   authenticateToken,
   requireRole(['CLIENT']),
+  createPetValidator,
+  validate,
   createPet
 );
 

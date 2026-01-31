@@ -1,4 +1,7 @@
--- Roles
+-- =========================
+-- ENUMS
+-- =========================
+
 CREATE TYPE user_role AS ENUM ('CLIENT', 'VET', 'ADMIN');
 
 CREATE TYPE appointment_status AS ENUM (
@@ -9,64 +12,75 @@ CREATE TYPE appointment_status AS ENUM (
   'NO_SHOW'
 );
 
--- Usuarios
+-- =========================
+-- USERS
+-- =========================
+
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
-  full_name VARCHAR(100) NOT NULL,
-  email VARCHAR(100) UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL,
   role user_role NOT NULL,
   created_at TIMESTAMP DEFAULT NOW()
 );
 
--- Veterinarios (perfil)
+-- =========================
+-- VETS
+-- =========================
+
 CREATE TABLE vets (
-  id SERIAL PRIMARY KEY,
-  user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
-  specialty VARCHAR(100)
+  id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  specialty TEXT,
+  active BOOLEAN DEFAULT TRUE
 );
 
--- Mascotas
+-- =========================
+-- PETS
+-- =========================
+
 CREATE TABLE pets (
   id SERIAL PRIMARY KEY,
-  owner_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-  name VARCHAR(50) NOT NULL,
-  species VARCHAR(50) NOT NULL,
-  breed VARCHAR(50),
-  birth_date DATE
+  owner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  species TEXT NOT NULL,
+  breed TEXT,
+  birth_date DATE,
+  created_at TIMESTAMP DEFAULT NOW()
 );
 
--- Servicios
+-- =========================
+-- SERVICES
+-- =========================
+
 CREATE TABLE services (
   id SERIAL PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  duration_minutes INTEGER NOT NULL,
-  price NUMERIC(10,2) NOT NULL
+  name TEXT NOT NULL,
+  duration_minutes INTEGER NOT NULL CHECK (duration_minutes > 0),
+  price NUMERIC(10,2) NOT NULL CHECK (price >= 0)
 );
 
--- Citas
+-- =========================
+-- APPOINTMENTS
+-- =========================
+
 CREATE TABLE appointments (
   id SERIAL PRIMARY KEY,
-  pet_id INTEGER REFERENCES pets(id),
-  vet_id INTEGER REFERENCES vets(id),
-  service_id INTEGER REFERENCES services(id),
+  client_id INTEGER NOT NULL REFERENCES users(id),
+  pet_id INTEGER NOT NULL REFERENCES pets(id),
+  vet_id INTEGER NOT NULL REFERENCES vets(id),
+  service_id INTEGER NOT NULL REFERENCES services(id),
   start_time TIMESTAMP NOT NULL,
   end_time TIMESTAMP NOT NULL,
-  status appointment_status DEFAULT 'REQUESTED',
+  status appointment_status NOT NULL DEFAULT 'REQUESTED',
   notes TEXT,
   created_at TIMESTAMP DEFAULT NOW(),
-
-  CHECK (end_time > start_time)
+  CHECK (start_time < end_time)
 );
 
--- Pagos
-CREATE TABLE payments (
-  id SERIAL PRIMARY KEY,
-  appointment_id INTEGER UNIQUE REFERENCES appointments(id) ON DELETE CASCADE,
-  amount NUMERIC(10,2) NOT NULL,
-  paid_at TIMESTAMP DEFAULT NOW()
-);
--- Evitar doble reserva por veterinario
+-- =========================
+-- ANTI OVERLAP
+-- =========================
+
 CREATE EXTENSION IF NOT EXISTS btree_gist;
 
 ALTER TABLE appointments
@@ -75,4 +89,42 @@ EXCLUDE USING GIST (
   vet_id WITH =,
   tsrange(start_time, end_time) WITH &&
 )
-WHERE (status IN ('REQUESTED', 'CONFIRMED'));
+WHERE (status <> 'CANCELLED');
+
+-- =========================
+-- STATUS HISTORY (BITÁCORA)
+-- =========================
+
+CREATE TABLE appointment_status_history (
+  id SERIAL PRIMARY KEY,
+  appointment_id INTEGER REFERENCES appointments(id) ON DELETE CASCADE,
+  old_status appointment_status,
+  new_status appointment_status,
+  changed_by INTEGER REFERENCES users(id),
+  changed_at TIMESTAMP DEFAULT NOW()
+);
+
+-- =========================
+-- PAYMENTS
+-- =========================
+
+CREATE TABLE payments (
+  id SERIAL PRIMARY KEY,
+  appointment_id INTEGER UNIQUE REFERENCES appointments(id),
+  amount NUMERIC(10,2) NOT NULL,
+  payment_id TEXT UNIQUE NOT NULL, -- idempotencia
+  paid_at TIMESTAMP DEFAULT NOW()
+);
+
+-- =========================
+-- INDEXES (PERFORMANCE)
+-- =========================
+
+CREATE INDEX idx_appointments_vet_date
+ON appointments (vet_id, start_time);
+
+CREATE INDEX idx_appointments_client
+ON appointments (client_id);
+
+CREATE INDEX idx_appointments_status_date
+ON appointments (status, start_time);
