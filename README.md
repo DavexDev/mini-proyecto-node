@@ -16,7 +16,7 @@ El sistema permite a clientes registrar mascotas y agendar citas con veterinario
 
 ## Estructura del Proyecto
 
-text
+```text
 mini-proyecto-node/
 │
 ├── src/
@@ -30,13 +30,18 @@ mini-proyecto-node/
 ├── postman_collection.json
 ├── README.md
 └── package.json
-
+```
 ---
- ## Requisitos del Sistema
-***Node.js >= 18**
-***npm / pnpm / yarn**
-***PostgreSQL >= 14**
-***Git**
+
+## 🛠️ Requisitos del Sistema
+
+Antes de comenzar, asegúrate de tener instalados los siguientes componentes:
+
+*   **[Node.js](https://nodejs.org)** >= 18.x
+*   **Gestor de paquetes**: [npm](https://www.npmjs.com/), [pnpm](https://pnpm.io) o [yarn](https://yarnpkg.com)
+*   **[PostgreSQL](https://www.postgresql.org)** >= 14
+*   **[Git](https://git-scm.com)** (para control de versiones y despliegue)
+
 
 ## Instalación y Ejecución
 
@@ -88,27 +93,28 @@ VET: gestiona sus citas asignadas
 ADMIN: acceso total
 
 Endpoints Implementados
+Auth
+| Método | Endpoint       | Descripción                     |
+| ------ | -------------- | ------------------------------- |
+| POST   | /auth/register | Registro de usuario             |
+| POST   | /auth/login    | Login y generación de token JWT |
 
-###  Auth | Método | Endpoint | Descripción | 
-| ------ | -------------- | --------------------------- | 
-| POST | /auth/register | Registro de usuario | 
-| POST | /auth/login | Login y generación de token JWT|
 
+Pets
+| Método | Endpoint | Descripción     |
+| ------ | -------- | --------------- |
+| POST   | /pets    | Crear mascota   |
+| GET    | /pets    | Listar mascotas |
 
-
-### Pets (Mascotas) | Método | Endpoint | Descripción | 
- | ------ | -------- | --------------- | 
- | POST | /pets | Crear mascota | 
- | GET | /pets | Listar mascotas | 
- 
 **Body ejemplo:**
-json
+```bash
 {
   "name": "Firulais",
   "species": "Dog",
   "breed": "Labrador",
   "birthDate": "2020-05-10"
 }
+```
 ---
 Servicios
 | Método | Endpoint  | Descripción      |
