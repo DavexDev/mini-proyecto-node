@@ -1,21 +1,22 @@
- VetClinic — Sistema de Reservas Veterinarias (Backend)
+VetClinic — Sistema de Reservas Veterinarias (Backend)
 
 Prueba técnica de backend para un sistema de reservas de una clínica veterinaria.
 El sistema permite a clientes registrar mascotas y agendar citas con veterinarios, gestionando servicios, estados de citas, pagos simulados y control de concurrencia para evitar doble reserva.
 
- Stack Tecnológico
-- Node.js >= 18
-- Express.js (framework HTTP)
-- PostgreSQL >= 14
-- JWT para autenticación
-- bcrypt para hash de contraseñas
-- Postman para testing manual
-- Docker (pendiente / opcional)
+ ## Stack Tecnológico
+***Node.js >= 18**
+***Express.js (framework HTTP)**
+***PostgreSQL >= 14**
+***JWT para autenticación**
+***bcrypt para hash de contraseñas**
+***Postman para testing manual**
+***Docker (pendiente / opcional)**
 
 ℹ El proyecto fue desarrollado sin ORM para mantener control explícito de la lógica y facilitar la evaluación técnica.
 
- Estructura del Proyecto
+## Estructura del Proyecto
 
+text
 mini-proyecto-node/
 │
 ├── src/
@@ -30,29 +31,34 @@ mini-proyecto-node/
 ├── README.md
 └── package.json
 
- Requisitos del Sistema
-- Node.js >= 18
-- npm / pnpm / yarn
-- PostgreSQL >= 14
-- Git
+---
+ ## Requisitos del Sistema
+***Node.js >= 18**
+***npm / pnpm / yarn**
+***PostgreSQL >= 14**
+***Git**
 
-Instalación y Ejecución
+## Instalación y Ejecución
 
 1️⃣ Clonar el repositorio
+``` bash 
 git clone <repo-url>
 cd mini-proyecto-node
-
+```
 2️⃣ Instalar dependencias
+``` bash
 npm install
+```
 
 3️⃣ Configurar variables de entorno
-Crear archivo .env:
 
+Crear archivo .env:
+```bash
 PORT=3000
 JWT_SECRET=super_secret_key
 DATABASE_URL=postgres://user:password@localhost:5432/vetclinic
-
- Base de Datos
+```
+Base de Datos
 
 El archivo schema.sql contiene:
 - Usuarios (CLIENT, VET, ADMIN)
@@ -66,8 +72,11 @@ El archivo schema.sql contiene:
 Incluye PK, FK, constraints, validaciones y prevención de doble reserva.
 
 Crear BD y aplicar esquema:
+
+```bash
 createdb vetclinic
 psql vetclinic < schema.sql
+```
 
 Autenticación
 - JWT (access token)
@@ -80,34 +89,54 @@ ADMIN: acceso total
 
 Endpoints Implementados
 
- Auth
-POST /auth/register → Registro de cliente
-POST /auth/login → Login y JWT
+###  Auth | Método | Endpoint | Descripción | 
+| ------ | -------------- | --------------------------- | 
+| POST | /auth/register | Registro de usuario | 
+| POST | /auth/login | Login y generación de token JWT|
 
-Mascotas
-POST /pets → CLIENT
-GET /pets → CLIENT
 
+
+### Pets (Mascotas) | Método | Endpoint | Descripción | 
+ | ------ | -------- | --------------- | 
+ | POST | /pets | Crear mascota | 
+ | GET | /pets | Listar mascotas | 
+ 
+**Body ejemplo:**
+json
+{
+  "name": "Firulais",
+  "species": "Dog",
+  "breed": "Labrador",
+  "birthDate": "2020-05-10"
+}
+---
 Servicios
-GET /services → Auth
-POST /services → ADMIN
+| Método | Endpoint  | Descripción      |
+| ------ | --------- | ---------------- |
+| GET    | /services | Listar servicios |
+| POST   | /services | Crear servicio   |
+
 
 Veterinarios
-GET /vets?specialty=
-GET /vets/:id/availability?date=YYYY-MM-DD
+| Método | Endpoint                     | Descripción              |
+| ------ | ---------------------------- | ------------------------ |
+| GET    | /vets?specialty=             | Listar veterinarios      |
+| GET    | /vets/:id/availability?date= | Disponibilidad por fecha |
 
 Citas
-POST /appointments → CLIENT
-PATCH /appointments/:id/status → CLIENT / VET / ADMIN
-GET /appointments/me → CLIENT
-GET /appointments/vet/me?date= → VET
+| Método | Endpoint                   | Rol permitido    | Descripción                  |
+| ------ | -------------------------- | ---------------- | ---------------------------- |
+| POST   | /appointments              | CLIENT           | Crear cita                   |
+| PATCH  | /appointments/:id/status   | CLIENT/VET/ADMIN | Actualizar estado de cita    |
+| GET    | /appointments/me           | CLIENT           | Listar citas propias         |
+| GET    | /appointments/vet/me?date= | VET              | Listar citas del veterinario |
+
 
 Pagos
-POST /appointments/:id/pay
+| Método | Endpoint              | Descripción                                                         |
+| ------ | --------------------- | ------------------------------------------------------------------- |
+| POST   | /appointments/:id/pay | Pago simulado, solo si COMPLETED, idempotencia mediante `paymentId` |
 
-- Pago simulado
-- Solo permitido si la cita está COMPLETED
-- Idempotencia mediante paymentId
 
  Reglas de Negocio
 - El cliente solo gestiona sus mascotas y citas
@@ -120,7 +149,10 @@ POST /appointments/:id/pay
 Concurrencia y Anti-Overlap
 
 Validación de solapamiento:
+
+```bash
 newStart < existingEnd AND newEnd > existingStart
+```
 
 PostgreSQL:
 - Uso recomendado de tsrange
