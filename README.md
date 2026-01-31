@@ -1,16 +1,25 @@
-VetClinic — Sistema de Reservas Veterinarias (Backend)
+## VetClinic — Sistema de Reservas Veterinarias (Backend)
 
 Prueba técnica de backend para un sistema de reservas de una clínica veterinaria.
 El sistema permite a clientes registrar mascotas y agendar citas con veterinarios, gestionando servicios, estados de citas, pagos simulados y control de concurrencia para evitar doble reserva.
 
- ## Stack Tecnológico
-***Node.js >= 18**
-***Express.js (framework HTTP)**
-***PostgreSQL >= 14**
-***JWT para autenticación**
-***bcrypt para hash de contraseñas**
-***Postman para testing manual**
-***Docker (pendiente / opcional)**
+## Stack Tecnológico
+
+### Backend
+- **Node.js** >= 18
+- **Express.js**
+
+### Base de Datos
+- **PostgreSQL** >= 14
+
+### Seguridad
+- **JWT** — autenticación
+- **bcrypt** — password hashing
+
+### Testing & Tools
+- **Postman** — testing manual
+- **Docker** — opcional / pendiente
+
 
 ℹ El proyecto fue desarrollado sin ORM para mantener control explícito de la lógica y facilitar la evaluación técnica.
 
