@@ -1,229 +1,259 @@
-# Prueba Técnica – API Veterinaria
+VetClinic — Sistema de Reservas Veterinarias (Backend)
 
-## 📌 Descripción General
+Prueba técnica de backend para un sistema de reservas de una clínica veterinaria.
+El sistema permite a clientes registrar mascotas y agendar citas con veterinarios, gestionando servicios, estados de citas, pagos simulados y control de concurrencia para evitar doble reserva.
 
-API REST desarrollada como **prueba técnica**, orientada a la gestión de una clínica veterinaria. Permite administrar usuarios, mascotas (pets), veterinarios (vets) y citas (appointments), aplicando autenticación con JWT y control básico de concurrencia.
+📌 Stack Tecnológico
 
-El proyecto fue probado manualmente usando **Postman** y **curl**.
+Node.js >= 18
 
----
+Express.js (framework HTTP)
 
-## 🧱 Stack Tecnológico
+PostgreSQL >= 14
 
-* **Node.js**
-* **Express.js**
-* **PostgreSQL**
-* **JWT (JSON Web Tokens)** para autenticación
-* **npm** como gestor de dependencias
-* **Postman** para pruebas de la API
-* **Docker** (opcional – no incluido en esta versión)
+JWT para autenticación
 
----
+bcrypt para hash de contraseñas
 
-## 📂 Estructura del Proyecto (resumen)
+Postman para testing manual
 
-```text
-project-root/
+Docker (pendiente / opcional)
+
+ℹ️ El proyecto fue desarrollado sin ORM para mantener control explícito de la lógica y facilitar la evaluación técnica.
+
+📂 Estructura del Proyecto
+mini-proyecto-node/
+│
 ├── src/
-│   ├── routes/
 │   ├── controllers/
+│   ├── routes/
 │   ├── middlewares/
-│   ├── db/
+│   ├── utils/
 │   └── app.js
-├── package.json
-└── README.md
-```
-🛠️ Instalación y ejecución
-📋 Requisitos previos
+│
+├── schema.sql
+├── postman_collection.json
+├── README.md
+└── package.json
 
-Node.js v18+
+⚙️ Requisitos del Sistema
+
+Node.js >= 18
 
 npm / pnpm / yarn
 
-PostgreSQL (opcional)
+PostgreSQL >= 14
 
 Git
 
-Verificar versiones:
+🚀 Instalación y Ejecución
+1️⃣ Clonar el repositorio
+git clone <repo-url>
+cd mini-proyecto-node
 
-node -v
-npm -v
-
-📥 Clonar el repositorio
-git clone https://github.com/tu-usuario/tu-repo.git
-cd tu-repo
-
-📦 Instalar dependencias
+2️⃣ Instalar dependencias
 npm install
 
-⚙️ Variables de entorno
+3️⃣ Configurar variables de entorno
 
-Crear un archivo .env en la raíz:
+Crear archivo .env:
 
 PORT=3000
 JWT_SECRET=super_secret_key
+DATABASE_URL=postgres://user:password@localhost:5432/vetclinic
 
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=veterinary_db
-DB_USER=postgres
-DB_PASSWORD=postgres
+🗄️ Base de Datos
+📄 Esquema
+
+El archivo schema.sql contiene:
+
+Usuarios (CLIENT, VET, ADMIN)
+
+Mascotas
+
+Veterinarios
+
+Servicios
+
+Citas
+
+Pagos
+
+Bitácora de estados
+
+Incluye:
+
+PK / FK
+
+constraints
+
+validaciones
+
+prevención de doble reserva
+
+Crear BD y aplicar esquema
+createdb vetclinic
+psql vetclinic < schema.sql
+
+🔐 Autenticación
+
+JWT (access token)
+
+Password hashing con bcrypt
+
+Roles:
+
+CLIENT
+
+VET
+
+ADMIN
+
+📡 Endpoints Implementados
+🔑 Auth
+Método	Endpoint	Descripción
+POST	/auth/register	Registro de cliente
+POST	/auth/login	Login y JWT
+🐶 Mascotas
+Método	Endpoint	Rol
+POST	/pets	CLIENT
+GET	/pets	CLIENT
+🩺 Servicios
+Método	Endpoint	Rol
+GET	/services	Auth
+POST	/services	ADMIN
+👨‍⚕️ Veterinarios
+Método	Endpoint
+GET	/vets?specialty=
+GET	/vets/:id/availability?date=YYYY-MM-DD
+📅 Citas
+Método	Endpoint	Rol
+POST	/appointments	CLIENT
+PATCH	/appointments/:id/status	CLIENT / VET / ADMIN
+GET	/appointments/me	CLIENT
+GET	/appointments/vet/me?date=	VET
+💳 Pagos
+Método	Endpoint
+POST	/appointments/:id/pay
+
+Pago simulado
+
+Solo permitido si la cita está COMPLETED
+
+Idempotencia por paymentId
+
+⚠️ Reglas de Negocio
+
+Cliente:
+
+solo gestiona sus mascotas y citas
+
+Veterinario:
+
+solo ve y gestiona sus citas
+
+Admin:
+
+acceso total
+
+No se permite:
+
+doble reserva del mismo veterinario en el mismo horario
+
+Validación estricta de inputs
+
+Manejo consistente de errores HTTP
+
+🔒 Concurrencia y Anti-Overlap (Parte C)
+Estrategia utilizada
+
+Validación previa de overlap al crear citas:
+
+newStart < existingEnd && newEnd > existingStart
 
 
-⚠️ Si se usa almacenamiento en memoria (arrays), la base de datos es opcional.
+En PostgreSQL:
 
-▶️ Ejecutar el proyecto
+uso recomendado de tsrange
 
-Modo desarrollo:
+EXCLUDE USING GIST para evitar solapamientos (bonus planificado)
 
-npm run dev
+Justificación
 
+Garantiza consistencia
 
-Modo producción:
+Evita race conditions
 
-npm start
+Fácil de escalar a nivel DB
 
+🧾 Bitácora de Estados
 
-Servidor disponible en:
+Cada cambio de estado de una cita se registra con:
 
-http://localhost:3000
+estado anterior
 
----
+estado nuevo
 
-## 🔐 Autenticación
+usuario
 
-La API utiliza **JWT**. Para acceder a endpoints protegidos es necesario enviar el token en el header:
+timestamp
 
-```
-Authorization: Bearer <TOKEN>
-```
+Esto permite:
 
-El token se obtiene al iniciar sesión.
+auditoría
 
----
+historial
 
-## 📌 Endpoints Principales
+reprogramaciones futuras
 
-### 🔑 Auth
+🧪 Testing
+🟠 Testing Manual (actual)
 
-| Método | Endpoint       | Descripción                 |
-| ------ | -------------- | --------------------------- |
-| POST   | /auth/register | Registro de usuario         |
-| POST   | /auth/login    | Login y generación de token |
+Colección incluida:
 
----
+postman_collection.json
 
-### 🐶 Pets (Mascotas)
+Flujos probados:
 
-| Método | Endpoint | Descripción     |
-| ------ | -------- | --------------- |
-| POST   | /pets    | Crear mascota   |
-| GET    | /pets    | Listar mascotas |
+Auth
 
-**Body ejemplo:**
+Mascotas
 
-```json
-{
-  "name": "Firulais",
-  "species": "Dog",
-  "breed": "Labrador",
-  "birthDate": "2020-05-10"
-}
-```
+Servicios
 
----
+Citas
 
-### 🧑‍⚕️ Vets (Veterinarios)
+Estados
 
-| Método | Endpoint           | Descripción                       |
-| ------ | ------------------ | --------------------------------- |
-| POST   | /vets              | Crear veterinario                 |
-| GET    | /vets              | Listar veterinarios               |
-| PATCH  | /vets/:id/status   | Actualizar estado del veterinario |
-| PATCH  | /vets/:id/schedule | Actualizar agenda                 |
+Pagos simulados
 
----
+🟢 Testing Automatizado (planificado)
 
-### 📅 Appointments (Citas)
+Unit tests:
 
-| Método | Endpoint      | Descripción  |
-| ------ | ------------- | ------------ |
-| POST   | /appointments | Crear cita   |
-| GET    | /appointments | Listar citas |
+validación de overlap
 
----
+transición de estados
 
-## 🧪 Testing con Postman
+Integration test:
 
-Las pruebas de la API se realizaron **manualmente con Postman**, verificando:
+creación y confirmación de cita
 
-* Correcto funcionamiento de endpoints
-* Autenticación JWT
-* Creación y lectura de datos
-* Control básico de concurrencia (evitar solapamiento de citas)
+📊 Índices y Performance
 
-### ▶️ Cómo probar con Postman
+Índices propuestos:
 
-1. Abrir Postman
-2. Crear una nueva request
-3. Seleccionar el método HTTP (POST, GET, PATCH)
-4. Colocar la URL del endpoint
-5. En endpoints protegidos:
+(vet_id, start_time) → agenda veterinario
 
-   * Ir a la pestaña **Headers**
-   * Agregar:
+(client_id) → citas por cliente
 
-     ```
-     Key: Authorization
-     Value: Bearer <TOKEN>
-     ```
-6. En requests POST/PATCH:
+(status, start_time) → reportes
 
-   * Ir a **Body → raw → JSON**
-   * Enviar el body correspondiente
+(created_at) → pagos
+✍️ Nota Final
 
----
+Este proyecto fue desarrollado siguiendo buenas prácticas de backend, priorizando:
 
-## 🧪 Testing con curl (opcional)
+claridad
 
-Ejemplo de creación de mascota:
-
-```bash
-curl -X POST http://localhost:3000/pets \
--H "Authorization: Bearer <TOKEN>" \
--H "Content-Type: application/json" \
--d '{
-  "name": "Firulais",
-  "species": "Dog",
-  "breed": "Labrador",
-  "birthDate": "2020-05-10"
-}'
-```
-
----
-
-## 📋 Requisitos de la Prueba Técnica
-
-✔ Node.js
-✔ PostgreSQL
-✔ npm
-✔ API REST funcional
-✔ Testing manual con Postman
-✔ Documentación clara
-
----
-
-## 🚀 Estado del Proyecto
-
-* Endpoints implementados
-* Base de datos funcional
-* Testing manual completo
-* README documentado
-
-Docker se considera una **mejora futura**.
-
----
-
-## 👨‍💻 Autor
-
-Prueba técnica desarrollada con enfoque en buenas prácticas, claridad y funcionalidad.
+consistencia
