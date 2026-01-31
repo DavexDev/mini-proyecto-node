@@ -92,13 +92,13 @@ createdb vetclinic
 psql vetclinic < schema.sql
 ```
 
-##Docker (Base de Datos)
+## Docker (Base de Datos)
 
 El proyecto incluye soporte para Docker con PostgreSQL, permitiendo levantar el entorno de base de datos de forma rápida y reproducible.
 
 El archivo `docker-compose.yml` se encuentra en la raíz del proyecto y define el servicio de base de datos.
 
-### 📦 Servicios
+### Servicios
 
 - PostgreSQL 14
 - Base de datos: `vetclinic`
@@ -205,11 +205,19 @@ Citas
 | GET    | /appointments/me           | CLIENT           | Listar citas propias         |
 | GET    | /appointments/vet/me?date= | VET              | Listar citas del veterinario |
 
+## Pagos
 
-Pagos
-| Método | Endpoint              | Descripción                                                         |
-| ------ | --------------------- | ------------------------------------------------------------------- |
-| POST   | /appointments/:id/pay | Pago simulado, solo si COMPLETED, idempotencia mediante `paymentId` |
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| POST | /appointments/:id/pay | Pago simulado solo si la cita está COMPLETED |
+
+### Idempotencia de pagos
+
+El endpoint de pagos implementa un mecanismo de **idempotencia** mediante el uso de un `paymentId` único enviado por el cliente.
+
+Esto garantiza que, aunque el cliente repita la misma solicitud por error (doble click, reintento de red, timeout, etc.), el sistema **no generará un doble cobro**.
+
+Si el `paymentId` ya fue procesado previamente, el sistema devuelve el pago existente en lugar de crear uno nuevo.
 
 
  Reglas de Negocio
