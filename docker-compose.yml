@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:14
+    container_name: vetclinic_db
+    restart: always
+    environment:
+      POSTGRES_DB: vetclinic
+      POSTGRES_USER: vetuser
+      POSTGRES_PASSWORD: vetpass
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+volumes:
+  pgdata:
